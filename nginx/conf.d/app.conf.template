@@ -1,0 +1,22 @@
+server {
+    listen 80;
+
+    root /usr/share/nginx;
+    error_page 403 /403.html;
+    error_page 404 /404.html;
+    error_page 500 /500.html;
+
+    proxy_set_header Host $host:80;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    # proxy_set_header X-Forwarded-Host $host:80;
+    proxy_set_header X-Real-IP $remote_addr;
+
+    location / {
+        proxy_pass http://${NGINX_SERVER_NAME}:${NGINX_SERVER_PORT};
+
+    }
+    location ~* .*\.(jpg|gif|png|css|js|ico|svg)(\?.*)? {
+        root /usr/share/nginx/www;
+        access_log off;
+    }
+}
