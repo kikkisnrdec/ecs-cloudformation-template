@@ -10,6 +10,6 @@ done;
 
 echo Connected!;
 
-envsubst '$$NGINX_SERVER_NAME $$NGINX_SERVER_PORT' < /etc/nginx/conf.d/app.conf.template > /etc/nginx/conf.d/app.conf;
+envsubst '$$LISTEN_PORT $$NGINX_SERVER_NAME $$NGINX_SERVER_PORT' < /etc/nginx/conf.d/app.conf.template > /etc/nginx/conf.d/app.conf;
 
 exec nginx -g 'daemon off;';

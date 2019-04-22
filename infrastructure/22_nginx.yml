@@ -8,26 +8,45 @@ Parameters:
     Description: How many ECS hosts do you want to initially deploy?
     Type: Number
     Default: 1
+  ListenPort:
+    Type: String
+    Default: 8080
   NginxTag:
     Description: the Nginx ECR tag
     Type: String
-    Default: 190419
+    Default: 190401
 Resources:
   ############################################
   #####           Target Group           #####
   ############################################
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${EnvironmentName}-tg-${ListenPort}
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${AWS::AccountId}-${AWS::Region}-${EnvironmentName}-vpc
+      Port: !Ref ListenPort
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckIntervalSeconds: 15
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      TargetType: ip
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
         - Type: forward
-          TargetGroupArn:
-            Fn::ImportValue:
-              !Sub ${AWS::AccountId}-${AWS::Region}-${EnvironmentName}-default-tg
+          TargetGroupArn: !Ref TargetGroup
       LoadBalancerArn:
         Fn::ImportValue:
           !Sub ${AWS::AccountId}-${AWS::Region}-${EnvironmentName}-loadBalancer
-      Port: 80
+      Port: !Ref ListenPort
       Protocol: HTTP
   ECSALBListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
@@ -35,9 +54,7 @@ Resources:
     Properties:
       Actions:
         - Type: forward
-          TargetGroupArn:
-            Fn::ImportValue:
-              !Sub ${AWS::AccountId}-${AWS::Region}-${EnvironmentName}-default-tg
+          TargetGroupArn: !Ref TargetGroup
       Conditions:
         - Field: path-pattern
           Values: [/]
@@ -63,8 +80,8 @@ Resources:
         - Name: nginx
           Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/nginx:${NginxTag}
           PortMappings:
-            - ContainerPort: 80
-              HostPort: 80
+            - ContainerPort: !Ref ListenPort
+              HostPort: !Ref ListenPort
           MemoryReservation: 512
           LogConfiguration:
             LogDriver: awslogs
@@ -75,6 +92,8 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: !Sub ${EnvironmentName}-nginx
           Environment:
+            - Name: "LISTEN_PORT"
+              Value: !Ref ListenPort
             - Name: "NGINX_SERVER_NAME"
               Value: !Sub tomcat.${EnvironmentName}
             - Name: "NGINX_SERVER_PORT"
@@ -106,7 +125,5 @@ Resources:
                 !Sub ${AWS::AccountId}-${AWS::Region}-${EnvironmentName}-private-subnet2
       LoadBalancers:
         - ContainerName: nginx
-          ContainerPort: 80
-          TargetGroupArn:
-            Fn::ImportValue:
-              !Sub ${AWS::AccountId}-${AWS::Region}-${EnvironmentName}-default-tg
+          ContainerPort: !Ref ListenPort
+          TargetGroupArn: !Ref TargetGroup
