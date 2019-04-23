@@ -1,5 +1,7 @@
 ## How to run ECS by AWS CloudFormation
 
+![ECS](https://github.com/kikkisnrdec/ecs-cloudformation-template/blob/images/ECS.png)
+
 ```
 # Role
 $ aws cloudformation create-stack --stack-name role --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --template-body file://./infrastructure/01_role.yml --parameters ParameterKey=EnvironmentName,ParameterValue=qa
