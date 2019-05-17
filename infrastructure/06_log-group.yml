@@ -12,6 +12,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub ${EnvironmentName}-log-group
+      RetentionInDays: 1
 Outputs:
   LogGroup:
     Value: !Ref LogGroup
