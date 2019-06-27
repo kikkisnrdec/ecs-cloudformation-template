@@ -5,6 +5,8 @@ RUN rm -rf /usr/local/tomcat/webapps/* /tmp/* \
     && mv /tmp/server.xml $CATALINA_HOME/conf/server.xml \
     && apk add --no-cache mysql-client redis
 COPY ./sh/*.sh /tmp/sh/
+# Remove a comment out in case that you want to use downloaded JCE.
+#COPY ./security/*.jar /usr/lib/jvm/java-X.X-openjdk/jre/jre/lib/security/
 COPY ./war/*.war /usr/local/tomcat/webapps/ROOT.war
 RUN chmod -R 777 /tmp/*
 ENTRYPOINT ["sh", "/tmp/sh/entrypoint.sh"]

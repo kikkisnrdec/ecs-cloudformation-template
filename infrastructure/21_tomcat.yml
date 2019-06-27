@@ -50,7 +50,7 @@ Resources:
             - Name: "MYSQL_URI"
               Value: !Sub mysql.${EnvironmentName}
             - Name: "CATALINA_OPTS"
-              Value: "-Xms512m -Xmx1024m"
+              Value: "-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
             - Name: "SPRING_PROFILES_ACTIVE"
               Value: "prod"
             - Name: "SPRING_DATASOURCE_URL"
